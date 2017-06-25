@@ -1,0 +1,104 @@
+---
+title: "Applied Predictive Modelling - Data Preprocessing Exercises"
+output: html_notebook
+---
+```{r load libraries}
+library(caret)
+library(corrplot)
+library(e1071)
+library(lattice)
+library(tibble)
+library(stringr)
+library(feather)
+library(mlbench)
+```
+
+Exercise 1: Glass Classification problem
+```{r load data}
+data("Glass")
+glimpse(Glass)
+```
+
+1) skewness and distribution
+```{r distribution}
+# calculate skewness
+skew <- apply(Glass[,-10], 2, e1071::skewness)
+skew
+
+# plot histogram
+hist <- apply(Glass[,-10], 2, lattice::histogram)
+hist$K
+hist$Ba
+```
+
+2) correlation
+```{r examine correlation}
+correlations <- cor(Glass[,-10])
+corrplot(correlations, order = "hclust")  # strong correlations
+```
+
+```{r check near zero variance}
+nearZeroVar(Glass[,-10]) # no predictors have near zero variance
+```
+
+3) pca analysis
+```{r variable transformation}
+# pca: cope with correlation
+
+# centre & scale
+
+```
+
+```{r suggested 1 - density plot}
+library(reshape2)
+
+meltedGlass <- melt(Glass, id.vars = "Type")
+glimpse(meltedGlass)
+head(meltedGlass)
+
+lattice::densityplot(~value|variable,
+                     data = meltedGlass,
+                     adjust = 1.25,
+                     scales = list(x = list(relation = "free"),
+                                   y = list(relation = "free")),
+                     pch = "|",
+                     xlab = "Predictor")
+```
+
+```{r scatterplot matrix}
+lattice::splom(~Glass[,-10],
+               group = Type,
+               data = Glass,
+               pch = 16,
+               col = rgb(.2, .2, .2, .4),
+               cex = .7) 
+```
+
+```{r transformation}
+# zero values: eliminate log transformations and box cox transformations
+# instead, use yeo johnson family distribution (similar to box cox, but can handle negative or zero values)
+yjtrans <- preProcess(Glass[, -10], method = "YeoJohnson")
+yjData <- predict(yjtrans, newdata = Glass[,-10])
+melted <- melt(yjData)
+```
+```{r distribution after transformation}
+lattice::densityplot(~value|variable,
+                     data = melted,
+                     adjust = 1.25,
+                     scales = list(x = list(relation = "free"),
+                                   y = list(relation = "free")),
+                     pch = "|",
+                     xlab = "Predictor")
+```
+```{r spatial sign transformation}
+# use spatial sign transformation to mitigate outliers
+centerScale <- preProcess(Glass[,-10], method = c("center", "scale"))
+csData <- predict(centerScale, newdata = Glass[,-10])
+ssData <- spatialSign(csData) # apply spatial sign transformation after centering and scaling; input variables have to all be numeric data (factors not allowed)
+lattice::splom(~ssData,
+               data = Glass,
+               pch = 16,
+               col = rgb(.2, .2, .2, .4),
+               cex = .7) 
+```
+END OF FIRST EXERCISE

@@ -1,9 +1,11 @@
 ---
-title: "Applied Predictive Modelling - Data Preprocessing"
-output: html_notebook
+title: "Applied Predictive Modelling Data Preprocessing"
+output:
+  html_document: default
+  html_notebook: default
 ---
 
-```{r load packages,message=FALSE, comment=False}
+```{r load packages}
 # install.packages("caret")
 # install.packages("corrplot")
 # install.packages("e1071")
@@ -32,6 +34,7 @@ segmentationOriginal <- read.csv("segmentationOriginal.csv")
 
 # save as a feather file
 write_feather(segmentationOriginal, "segmentationOriginal.feather")
+
 ```
 
 ```{r change column names}
@@ -111,7 +114,24 @@ spatialTrans <- caret::spatialSign(segData)
 head(spatialTrans[,1:5])
 ```
 
-```{r}
+```{r filtering}
+# get rid of variables with near zero variance (do not add information but could be problematic for some algorithms)
+nearZeroVar(segData)
+```
+```{r correlations}
+correlations <- cor(segData)
+corrplot(correlations, order = "hclust")
+```
 
+```{r delete variables with high correlation}
+highCorr <- findCorrelation(correlations, cutoff = .75)
+length(highCorr)
+head(highCorr)
+filteredSegData <- segData[, -highCorr]
+```
+```{r creating dummy variables}
+data("cars")
+
+head(cars)
 ```
 
