@@ -41,14 +41,7 @@ corrplot(correlations, order = "hclust")  # strong correlations
 nearZeroVar(Glass[,-10]) # no predictors have near zero variance
 ```
 
-3) pca analysis
-```{r variable transformation}
-# pca: cope with correlation
-
-# centre & scale
-
-```
-
+3) density plot
 ```{r suggested 1 - density plot}
 library(reshape2)
 
@@ -74,6 +67,7 @@ lattice::splom(~Glass[,-10],
                cex = .7) 
 ```
 
+4) transformation
 ```{r transformation}
 # zero values: eliminate log transformations and box cox transformations
 # instead, use yeo johnson family distribution (similar to box cox, but can handle negative or zero values)
